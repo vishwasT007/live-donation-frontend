@@ -2,6 +2,9 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// ✅ Base URL from environment variable or fallback
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 const Register = () => {
   const [form, setForm] = useState({
     name: "",
@@ -13,13 +16,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:4000/api/auth/register", {
+      await axios.post(`${BASE_URL}/api/auth/register`, {
         ...form,
       });
       alert("Registration successful!");
       navigate("/");
     } catch (err) {
-      alert("Register failed: " + err.response.data.message);
+      alert(
+        "Register failed: " + (err.response?.data?.message || "Server error")
+      );
     }
   };
 
