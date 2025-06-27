@@ -4,6 +4,8 @@ import axios from "axios";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/solid";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const UserList = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
@@ -16,7 +18,7 @@ const UserList = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("/api/auth/users", {
+      const res = await axios.get(`${API}/api/auth/users`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setUsers(res.data);
@@ -39,7 +41,7 @@ const UserList = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`/api/auth/users/${deleteConfirmation.userId}`, {
+      await axios.delete(`${API}/api/auth/users/${deleteConfirmation.userId}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       fetchUsers();
@@ -53,7 +55,7 @@ const UserList = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `/api/auth/users/${editUser._id}`,
+        `${API}/api/auth/users/${editUser._id}`,
         { name: editUser.name, role: editUser.role },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -163,7 +165,6 @@ const UserList = () => {
         </table>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {deleteConfirmation.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
