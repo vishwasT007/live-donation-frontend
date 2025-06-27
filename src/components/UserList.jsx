@@ -64,6 +64,14 @@ const UserList = () => {
     }
   };
 
+  const startEditing = (user) => {
+    setEditUser({ ...user });
+  };
+
+  const cancelEditing = () => {
+    setEditUser(null);
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">User List</h2>
@@ -81,24 +89,73 @@ const UserList = () => {
             {Array.isArray(users) &&
               users.map((u) => (
                 <tr key={u._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{u.name}</td>
+                  <td className="px-4 py-2">
+                    {editUser?._id === u._id ? (
+                      <input
+                        type="text"
+                        value={editUser.name}
+                        onChange={(e) =>
+                          setEditUser({ ...editUser, name: e.target.value })
+                        }
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                    ) : (
+                      u.name
+                    )}
+                  </td>
                   <td className="px-4 py-2">{u.username}</td>
-                  <td className="px-4 py-2 capitalize">{u.role}</td>
+                  <td className="px-4 py-2 capitalize">
+                    {editUser?._id === u._id ? (
+                      <select
+                        value={editUser.role}
+                        onChange={(e) =>
+                          setEditUser({ ...editUser, role: e.target.value })
+                        }
+                        className="border rounded px-2 py-1"
+                      >
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    ) : (
+                      u.role
+                    )}
+                  </td>
                   <td className="px-4 py-2 space-x-2">
-                    <button
-                      onClick={() => setEditUser(u)}
-                      className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100"
-                      title="Edit"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => openDeleteConfirmation(u._id, u.name)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100"
-                      title="Delete"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
+                    {editUser?._id === u._id ? (
+                      <>
+                        <button
+                          onClick={handleEditSubmit}
+                          className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100"
+                          title="Save"
+                        >
+                          <CheckIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-100"
+                          title="Cancel"
+                        >
+                          <XMarkIcon className="h-5 w-5" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => startEditing(u)}
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100"
+                          title="Edit"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => openDeleteConfirmation(u._id, u.name)}
+                          className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100"
+                          title="Delete"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -106,71 +163,29 @@ const UserList = () => {
         </table>
       </div>
 
-      {/* Edit Modal */}
-      {editUser && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <div className="modal-header">
-              <h3>Edit User</h3>
-              <button onClick={() => setEditUser(null)}>
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            <form onSubmit={handleEditSubmit} className="space-y-3">
-              <div>
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={editUser.name}
-                  onChange={(e) =>
-                    setEditUser({ ...editUser, name: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label>Role</label>
-                <select
-                  value={editUser.role}
-                  onChange={(e) =>
-                    setEditUser({ ...editUser, role: e.target.value })
-                  }
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={() => setEditUser(null)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="submit-btn">
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Delete Confirmation Modal */}
       {deleteConfirmation.isOpen && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <div className="modal-icon">🗑️</div>
-            <div className="modal-title">Confirm Deletion</div>
-            <div className="modal-message">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-center text-4xl mb-4">🗑️</div>
+            <h3 className="text-xl font-bold text-center mb-2">
+              Confirm Deletion
+            </h3>
+            <p className="text-center mb-6">
               Are you sure you want to delete user{" "}
               <strong>{deleteConfirmation.userName}</strong>?
-            </div>
-            <div className="modal-actions">
-              <button className="cancel-btn" onClick={closeDeleteConfirmation}>
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                onClick={closeDeleteConfirmation}
+              >
                 Cancel
               </button>
-              <button className="delete-btn" onClick={handleDelete}>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                onClick={handleDelete}
+              >
                 Delete
               </button>
             </div>
