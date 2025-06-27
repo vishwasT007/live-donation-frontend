@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
@@ -9,15 +8,14 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
 
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:4000/api/dashboard/stats",
-          {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }
-        );
+        const res = await axios.get(`${API_BASE}/api/dashboard/stats`, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
         setStats(res.data);
       } catch (err) {
         console.error("Failed to fetch dashboard stats", err);
@@ -26,7 +24,7 @@ const Dashboard = () => {
 
     const fetchRecent = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/report/recent", {
+        const res = await axios.get(`${API_BASE}/api/report/recent`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         setRecent(res.data);
@@ -37,15 +35,15 @@ const Dashboard = () => {
 
     fetchStats();
     fetchRecent();
-  }, [user.token]);
+  }, [user.token, API_BASE]);
 
   const exportExcel = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/report/export", {
+      const res = await axios.get(`${API_BASE}/api/report/export`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
-        responseType: "blob", // 👈 Important for binary file
+        responseType: "blob", // 👈 Important for file download
       });
 
       const url = window.URL.createObjectURL(new Blob([res.data]));
